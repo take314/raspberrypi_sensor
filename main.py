@@ -40,6 +40,10 @@ def get_co2_fig():
     return fig
 
 
+def get_sampling_results():
+    return [html.H3(id='container-sample-main', children=' '),
+            html.H6(id='container-sample-sub', children=' ')]
+
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -47,13 +51,19 @@ app.layout = html.Div(children=[
     html.Hr(),
     html.H2(children='Raspberry Pi Sensor Monitor'),
     html.Hr(),
-    html.H3(id='container-sample-main', children=''),
-    html.H6(id='container-sample-sub', children=''),
+    dcc.Loading(id='sampling-container',
+                children=get_sampling_results(),
+                type='dot'),
     html.Button('Sampling', id='sampling', n_clicks=0),
     html.Hr(),
     dcc.Graph(id='co2-graph', figure=get_co2_fig()),
     dcc.Interval(id='interval', interval=60000, n_intervals=0)
 ], style={'textAlign': 'center'})
+
+
+@app.callback(Output('sampling-container', 'children'), Input('sampling', 'value'))
+def input_triggers_spinner(value):
+    return get_sampling_results()
 
 
 @app.callback([Output('container-sample-main', 'children'), Output('container-sample-sub', 'children')],
