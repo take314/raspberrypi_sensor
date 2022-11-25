@@ -10,9 +10,9 @@ import plotly.graph_objects as go
 from dash import dcc, html, no_update
 from dash.dependencies import Input, Output
 
-current_date = str(datetime.datetime.now()).split(' ')[0]
-path = f'{current_date}.csv'
-last_mtime = os.stat(path).st_mtime
+
+def get_date():
+    return str(datetime.datetime.now()).split(' ')[0]
 
 
 def sampling():
@@ -45,8 +45,11 @@ def get_sampling_values():
     return f'{sample} ppm', f'{datetime.datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+current_date = str(datetime.datetime.now()).split(' ')[0]
+path = f'{current_date}.csv'
+last_mtime = os.stat(path).st_mtime
+app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
+
 
 app.layout = html.Div(children=[
     html.Hr(),
@@ -64,14 +67,22 @@ app.layout = html.Div(children=[
                Output('container-sample-sub', 'children'),
                Output('co2-graph', 'figure')],
               [Input('interval', 'n_intervals')])
-def trigger_by_modify(n):
-    co2_ppm, date = get_sampling_values()
-    global last_mtime
+def trigger_by_interval(n):
+    global last_mtime, current_date, path
+    date = get_date()
+    co2_ppm, updated_time = get_sampling_values()
+
     if os.stat(path).st_mtime > last_mtime:
         last_mtime = os.stat(path).st_mtime
         print(f'modified at {last_mtime}')
-        return co2_ppm, date, get_co2_fig()
-    return co2_ppm, date, no_update
+        return co2_ppm, updated_time, get_co2_fig()
+    elif current_date != date:
+        current_date = date
+        path = f'{current_date}.csv'
+        print(f'new csv created: {path}')
+        return co2_ppm, updated_time, get_co2_fig()
+    else:
+        return co2_ppm, updated_time, no_update
 
 
 if __name__ == '__main__':
