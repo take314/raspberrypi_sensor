@@ -8,8 +8,8 @@ import datetime
 import csv
 import os
 current_date = str(datetime.datetime.now()).split(' ')[0]
-#path = f'{current_date}.csv'
-path = f'test.csv'
+path = f'{current_date}.csv'
+#path = f'test.csv'
 
 last_mtime = os.stat(path).st_mtime
 
