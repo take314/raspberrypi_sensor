@@ -40,7 +40,8 @@ def get_co2_fig():
     fig.update_layout(title=dict(text='CO2 Monitor', xref='paper', xanchor='center', x=0.5),
                       xaxis_title='Date',
                       yaxis_title='CO2 (ppm)',
-                      margin=dict(l=200, r=200))
+                      margin=dict(l=200, r=200),
+                      uirevision='true')
     return fig
 
 
