@@ -15,6 +15,10 @@ def get_date():
     return str(datetime.datetime.now()).split(' ')[0]
 
 
+def get_path(d):
+    return f'data/{d}.csv'
+
+
 def sampling():
     return subprocess.check_output(['bash', 'sampling.sh'])
 
@@ -45,8 +49,8 @@ def get_sampling_values():
     return f'{sample} ppm', f'{datetime.datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
 
 
-current_date = str(datetime.datetime.now()).split(' ')[0]
-path = f'{current_date}.csv'
+current_date = get_date()
+path = get_path(current_date)
 last_mtime = os.stat(path).st_mtime
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
@@ -78,7 +82,7 @@ def trigger_by_interval(n):
         return co2_ppm, updated_time, get_co2_fig()
     elif current_date != date:
         current_date = date
-        path = f'{current_date}.csv'
+        path = get_path(current_date)
         print(f'new csv created: {path}')
         return co2_ppm, updated_time, get_co2_fig()
     else:
