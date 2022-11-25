@@ -2,6 +2,7 @@
 
 import csv
 import datetime
+import glob
 import os
 import subprocess
 
@@ -17,6 +18,11 @@ def get_date():
 
 def get_path(d):
     return f'data/{d}.csv'
+
+
+def get_csv_dates():
+    files = glob.glob('data/*')
+    return [f.split('/')[1] for f in files]
 
 
 def sampling():
@@ -37,10 +43,8 @@ def get_co2_fig():
     timestamp = [datetime.datetime.fromtimestamp(int(i)) for i in data[0][1:]]
     co2_ppm = [int(i) for i in data[1][1:]]
     fig.add_trace(go.Scatter(x=timestamp, y=co2_ppm, line=dict(width=2)))
-    fig.update_layout(title=dict(text='CO2 Monitor', xref='paper', xanchor='center', x=0.5),
-                      xaxis_title='Date',
-                      yaxis_title='CO2 (ppm)',
-                      margin=dict(l=200, r=200),
+    fig.update_layout(yaxis_title='CO2 (ppm)',
+                      margin=dict(l=200, r=200, t=20, b=150),
                       uirevision='true')
     return fig
 
@@ -58,12 +62,13 @@ app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen
 
 app.layout = html.Div(children=[
     html.Hr(),
-    html.H2(children='Raspberry Pi Sensor Monitor'),
+    dcc.Markdown('''# Raspberry Pi Sensor Monitor'''),
     html.Hr(),
     html.H3(id='container-sample-main', children=''),
     html.H6(id='container-sample-sub', children=''),
     html.Hr(),
-    dcc.Graph(id='co2-graph', figure=get_co2_fig()),
+    dcc.Dropdown(get_csv_dates(), id='dropdown', style={'width': '40%', 'display': 'inline-block'}),
+    dcc.Graph(id='co2-graph', figure=get_co2_fig(), config={'displayModeBar': False}),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center'})
 
@@ -71,23 +76,26 @@ app.layout = html.Div(children=[
 @app.callback([Output('container-sample-main', 'children'),
                Output('container-sample-sub', 'children'),
                Output('co2-graph', 'figure')],
-              [Input('interval', 'n_intervals')])
-def trigger_by_interval(n):
+              [Input('interval', 'n_intervals'),
+               Input('dropdown', 'value')])
+def trigger_by_interval(n, value):
     global last_mtime, current_date, path
     date = get_date()
     co2_ppm, updated_time = get_sampling_values()
 
-    if os.stat(path).st_mtime > last_mtime:
-        last_mtime = os.stat(path).st_mtime
-        print(f'modified at {last_mtime}')
+    print(f'value {value}')
+    if value is None or value.split('.')[0] == date:
+        path = get_path(date)
+    else:
+        path = get_path(value.split('.')[0])
         return co2_ppm, updated_time, get_co2_fig()
-    elif current_date != date:
+
+    if current_date != date:
         current_date = date
         path = get_path(current_date)
         print(f'new csv created: {path}')
-        return co2_ppm, updated_time, get_co2_fig()
-    else:
-        return co2_ppm, updated_time, no_update
+
+    return co2_ppm, updated_time, get_co2_fig()
 
 
 if __name__ == '__main__':
