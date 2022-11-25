@@ -40,9 +40,10 @@ def get_co2_fig():
     return fig
 
 
-def get_sampling_results():
-    return [html.H3(id='container-sample-main', children=' '),
-            html.H6(id='container-sample-sub', children=' ')]
+def get_sampling_values():
+    sample = int(sampling())
+    return f'{sample} ppm', f'{datetime.datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
+
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -51,36 +52,26 @@ app.layout = html.Div(children=[
     html.Hr(),
     html.H2(children='Raspberry Pi Sensor Monitor'),
     html.Hr(),
-    dcc.Loading(id='sampling-container',
-                children=get_sampling_results(),
-                type='dot'),
-    html.Button('Sampling', id='sampling', n_clicks=0),
+    html.H3(id='container-sample-main', children=''),
+    html.H6(id='container-sample-sub', children=''),
     html.Hr(),
     dcc.Graph(id='co2-graph', figure=get_co2_fig()),
-    dcc.Interval(id='interval', interval=60000, n_intervals=0)
+    dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center'})
 
 
-@app.callback(Output('sampling-container', 'children'), Input('sampling', 'value'))
-def input_triggers_spinner(value):
-    return get_sampling_results()
-
-
-@app.callback([Output('container-sample-main', 'children'), Output('container-sample-sub', 'children')],
-              Input('sampling', 'n_clicks'))
-def update_output_main(n_clicks):
-    sample = int(sampling())
-    return f'{sample} ppm', f'{datetime.datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
-
-
-@app.callback(Output('co2-graph', 'figure'), [Input('interval', 'n_intervals')])
+@app.callback([Output('container-sample-main', 'children'),
+               Output('container-sample-sub', 'children'),
+               Output('co2-graph', 'figure')],
+              [Input('interval', 'n_intervals')])
 def trigger_by_modify(n):
+    co2_ppm, date = get_sampling_values()
     global last_mtime
     if os.stat(path).st_mtime > last_mtime:
         last_mtime = os.stat(path).st_mtime
         print(f'modified at {last_mtime}')
-        return get_co2_fig()
-    return no_update
+        return co2_ppm, date, get_co2_fig()
+    return co2_ppm, date, no_update
 
 
 if __name__ == '__main__':
