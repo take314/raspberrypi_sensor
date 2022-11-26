@@ -74,7 +74,9 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(get_csv_dates(), value=current_date, id='dropdown_date', style={'textAlign': 'left'})
             ], style={'width': '30%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '50%', 'display': 'inline-block'}),
-    dcc.Graph(id='co2-graph', figure=get_co2_fig(get_path(current_date)), config={'displayModeBar': False}),
+    dcc.Graph(id='co2-graph',
+              figure=get_co2_fig(get_path(current_date)),
+              config={'displayModeBar': False, 'scrollZoom': True}),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
