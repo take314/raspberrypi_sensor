@@ -2,7 +2,6 @@
 
 import csv
 import glob
-import os
 import subprocess
 from datetime import datetime
 
@@ -25,7 +24,7 @@ def get_csv_dates():
     return [f.split('/')[1].split('.')[0] for f in files]
 
 
-def read_csv():
+def read_csv(path):
     with open(path) as f:
         reader = csv.reader(f, delimiter=' ')
         data = [row for row in reader]
@@ -39,8 +38,8 @@ def sampling():
     return f'CO2: {sample} ppm', f'{datetime_now}'
 
 
-def get_co2_fig():
-    data = read_csv()
+def get_co2_fig(path):
+    data = read_csv(path)
     layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
     fig = go.Figure(layout=layout)
     timestamp = [datetime.fromtimestamp(int(i)) for i in data[0][1:]]
@@ -56,8 +55,6 @@ def get_co2_fig():
 
 graph_types = ['CO2']
 current_date = get_date()
-path = get_path(current_date)
-last_mtime = os.stat(path).st_mtime
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
 
@@ -77,7 +74,7 @@ app.layout = html.Div(children=[
                 dcc.Dropdown(get_csv_dates(), value=current_date, id='dropdown_date', style={'textAlign': 'left'})
             ], style={'width': '30%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '50%', 'display': 'inline-block'}),
-    dcc.Graph(id='co2-graph', figure=get_co2_fig(), config={'displayModeBar': False}),
+    dcc.Graph(id='co2-graph', figure=get_co2_fig(get_path(current_date)), config={'displayModeBar': False}),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
@@ -88,23 +85,20 @@ app.layout = html.Div(children=[
               [Input('interval', 'n_intervals'),
                Input('dropdown_date', 'value')])
 def trigger_by_interval(n, selected_date):
-    global last_mtime, current_date, path
+    global current_date
     date = get_date()
-    co2_ppm, updated_time = sampling()
-
-    print(f'selected_date {selected_date}')
-    if selected_date is None or selected_date == date:
-        path = get_path(date)
-    else:
-        path = get_path(selected_date)
-        return co2_ppm, updated_time, get_co2_fig()
 
     if current_date != date:
         current_date = date
-        path = get_path(current_date)
-        print(f'new csv created: {path}')
+        print(f'new csv created: {get_path(current_date)}')
 
-    return co2_ppm, updated_time, get_co2_fig()
+    co2_ppm, updated_time = sampling()
+    if selected_date is None or selected_date == current_date:
+        print(f'selected_date: {selected_date} -> use {current_date}.csv')
+        return co2_ppm, updated_time, get_co2_fig(get_path(current_date))
+    else:
+        print(f'selected_date: {selected_date}.csv exists -> use it')
+        return co2_ppm, updated_time, get_co2_fig(get_path(selected_date))
 
 
 if __name__ == '__main__':
