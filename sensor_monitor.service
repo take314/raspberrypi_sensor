@@ -3,8 +3,7 @@ Description=Run sensor monitor
 After=network.target
 
 [Service]
-ExecStart=start.sh
-WorkingDirectory=/home/pi/git/raspberrypi_sensor
+ExecStart=/usr/bin/python /home/pi/git/raspberrypi_sensor/main.py
 
 [Install]
 WantedBy=multi-user.target
