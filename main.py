@@ -57,7 +57,7 @@ graph_types = ['CO2']
 current_date = get_date()
 app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
 
-
+app.title = 'Raspberry Pi Sensor Monitor'
 app.layout = html.Div(children=[
     html.Br(),
     html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': 'Arial Black', 'fontSize': 48}),
