@@ -4,6 +4,8 @@ After=network.target
 
 [Service]
 ExecStart=/usr/bin/python /home/pi/git/raspberrypi_sensor/main.py
+WorkingDirectory=/home/pi/git/raspberrypi_sensor
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
