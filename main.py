@@ -39,7 +39,7 @@ def sampling():
 
 
 def shutdown():
-    subprocess.run(['bash', 'shutdown.sh'])
+    subprocess.Popen(['bash', 'shutdown.sh'])
 
 
 def get_co2_fig(path):
