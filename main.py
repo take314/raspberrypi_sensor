@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import csv
-import datetime
 import glob
 import os
 import subprocess
+from datetime import datetime
 
 import dash
 import plotly.graph_objects as go
-from dash import dcc, html, no_update
+from dash import dcc, html
 from dash.dependencies import Input, Output
 
 
 def get_date():
-    return str(datetime.datetime.now()).split(' ')[0]
+    return str(datetime.now()).split(' ')[0]
 
 
 def get_path(d):
@@ -22,11 +22,7 @@ def get_path(d):
 
 def get_csv_dates():
     files = glob.glob('data/*')
-    return [f.split('/')[1] for f in files]
-
-
-def sampling():
-    return subprocess.check_output(['bash', 'sampling.sh'])
+    return [f.split('/')[1].split('.')[0] for f in files]
 
 
 def read_csv():
@@ -37,23 +33,28 @@ def read_csv():
     return data_t
 
 
+def sampling():
+    sample = int(subprocess.check_output(['bash', 'sampling.sh']))
+    datetime_now = datetime.now().strftime("%Y/%m/%d - %H:%M:%S")
+    return f'CO2: {sample} ppm', f'{datetime_now}'
+
+
 def get_co2_fig():
     data = read_csv()
-    fig = go.Figure()
-    timestamp = [datetime.datetime.fromtimestamp(int(i)) for i in data[0][1:]]
+    layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
+    fig = go.Figure(layout=layout)
+    timestamp = [datetime.fromtimestamp(int(i)) for i in data[0][1:]]
     co2_ppm = [int(i) for i in data[1][1:]]
-    fig.add_trace(go.Scatter(x=timestamp, y=co2_ppm, line=dict(width=2)))
+    fig.add_trace(go.Scatter(x=timestamp, y=co2_ppm, line=dict(width=2, color='Crimson')))
+    fig.update_xaxes(showgrid=False)
+    fig.update_yaxes(showgrid=False)
     fig.update_layout(yaxis_title='CO2 (ppm)',
-                      margin=dict(l=200, r=200, t=20, b=150),
+                      margin=dict(l=200, r=200, t=10, b=160), showlegend=False,
                       uirevision='true')
     return fig
 
 
-def get_sampling_values():
-    sample = int(sampling())
-    return f'{sample} ppm', f'{datetime.datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
-
-
+graph_types = ['CO2']
 current_date = get_date()
 path = get_path(current_date)
 last_mtime = os.stat(path).st_mtime
@@ -61,33 +62,41 @@ app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen
 
 
 app.layout = html.Div(children=[
-    html.Hr(),
-    dcc.Markdown('''# Raspberry Pi Sensor Monitor'''),
-    html.Hr(),
-    html.H3(id='container-sample-main', children=''),
+    html.Br(),
+    html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': 'Arial Black', 'fontSize': 48}),
+    html.H3(id='container-sample-main', children='', style={'fontFamily': 'Arial Black', 'fontSize': 32}),
     html.H6(id='container-sample-sub', children=''),
     html.Hr(),
-    dcc.Dropdown(get_csv_dates(), id='dropdown', style={'width': '40%', 'display': 'inline-block'}),
+    html.Div(children=[
+        html.Div(children=[
+                html.Label('Type'),
+                dcc.Dropdown(graph_types, value=graph_types[0], id='dropdown_graphtype', style={'textAlign': 'left'})
+            ], style={'width': '20%', 'display': 'inline-block', 'marginRight': 5}),
+        html.Div(children=[
+                html.Label('Date'),
+                dcc.Dropdown(get_csv_dates(), value=current_date, id='dropdown_date', style={'textAlign': 'left'})
+            ], style={'width': '30%', 'display': 'inline-block', 'marginLeft': 5})
+    ], style={'width': '50%', 'display': 'inline-block'}),
     dcc.Graph(id='co2-graph', figure=get_co2_fig(), config={'displayModeBar': False}),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
-], style={'textAlign': 'center'})
+], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
 
 @app.callback([Output('container-sample-main', 'children'),
                Output('container-sample-sub', 'children'),
                Output('co2-graph', 'figure')],
               [Input('interval', 'n_intervals'),
-               Input('dropdown', 'value')])
-def trigger_by_interval(n, value):
+               Input('dropdown_date', 'value')])
+def trigger_by_interval(n, selected_date):
     global last_mtime, current_date, path
     date = get_date()
-    co2_ppm, updated_time = get_sampling_values()
+    co2_ppm, updated_time = sampling()
 
-    print(f'value {value}')
-    if value is None or value.split('.')[0] == date:
+    print(f'selected_date {selected_date}')
+    if selected_date is None or selected_date == date:
         path = get_path(date)
     else:
-        path = get_path(value.split('.')[0])
+        path = get_path(selected_date)
         return co2_ppm, updated_time, get_co2_fig()
 
     if current_date != date:
