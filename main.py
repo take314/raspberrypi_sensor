@@ -59,8 +59,7 @@ def get_co2_fig(path):
 
 graph_types = ['CO2']
 current_date = get_date()
-app = dash.Dash(__name__, external_stylesheets=['https://codepen.io/chriddyp/pen/bWLwgP.css'])
-
+app = dash.Dash(__name__)
 app.title = 'Raspberry Pi Sensor Monitor'
 app.layout = html.Div(children=[
     html.Br(),
@@ -85,8 +84,8 @@ app.layout = html.Div(children=[
     html.Div(children=[
             html.Button('Shutdown', id='shutdown', n_clicks=0),
             html.H6(id='shutdown_message', children='', style={'fontSize': 16}),
-            html.Br()
-        ]),
+            html.Br()]),
+    html.Img(src='assets/plotly_logo.webp', alt='image', style={'width': '12%', 'marginBottom': 40}),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
