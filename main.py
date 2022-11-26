@@ -38,6 +38,10 @@ def sampling():
     return f'CO2: {sample} ppm', f'{datetime_now}'
 
 
+def shutdown():
+    subprocess.run(['bash', 'shutdown.sh'])
+
+
 def get_co2_fig(path):
     data = read_csv(path)
     layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
@@ -48,8 +52,8 @@ def get_co2_fig(path):
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
     fig.update_layout(yaxis_title='CO2 (ppm)',
-                      margin=dict(l=200, r=200, t=10, b=160), showlegend=False,
-                      uirevision='true')
+                      margin=dict(l=200, r=200, t=10, b=10), showlegend=False,
+                      uirevision='true', height=300)
     return fig
 
 
@@ -76,7 +80,13 @@ app.layout = html.Div(children=[
     ], style={'width': '50%', 'display': 'inline-block'}),
     dcc.Graph(id='co2-graph',
               figure=get_co2_fig(get_path(current_date)),
-              config={'displayModeBar': False, 'scrollZoom': True}),
+              config={'displayModeBar': False, 'responsive': False}),
+    html.Hr(),
+    html.Div(children=[
+            html.Button('Shutdown', id='shutdown', n_clicks=0),
+            html.H6(id='shutdown_message', children='', style={'fontSize': 16}),
+            html.Br()
+        ]),
     dcc.Interval(id='interval', interval=10000, n_intervals=0)
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
@@ -101,6 +111,15 @@ def trigger_by_interval(n, selected_date):
     else:
         print(f'selected_date: {selected_date}.csv exists -> use it')
         return co2_ppm, updated_time, get_co2_fig(get_path(selected_date))
+
+
+@app.callback(Output('shutdown_message', 'children'), Input('shutdown', 'n_clicks'))
+def shutdown_button_clicked(n_clicks):
+    if n_clicks > 0:
+        shutdown()
+        return 'shutdown signal send...'
+    else:
+        return ''
 
 
 if __name__ == '__main__':
