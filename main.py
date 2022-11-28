@@ -60,7 +60,6 @@ def get_co2_fig(path):
 graph_types = ['CO2']
 csv_dates = get_csv_dates()
 current_date = get_date()
-co2_ppm, updated_time = sampling()
 co2_fig = get_co2_fig(get_path(current_date))
 
 app = dash.Dash(__name__)
@@ -68,8 +67,8 @@ app.title = 'Raspberry Pi Sensor Monitor'
 app.layout = html.Div(children=[
     html.Br(),
     html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': 'Arial Black', 'fontSize': 48}),
-    html.H3(id='container-sample-main', children=co2_ppm, style={'fontFamily': 'Arial Black', 'fontSize': 32}),
-    html.H6(id='container-sample-sub', children=updated_time),
+    html.H3(id='container-sample-main', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32}),
+    html.H6(id='container-sample-sub', children=' '),
     html.Hr(),
     html.Div(children=[
         html.Div(children=[
@@ -97,27 +96,30 @@ app.layout = html.Div(children=[
 @app.callback([Output('container-sample-main', 'children'),
                Output('container-sample-sub', 'children'),
                Output('co2-graph', 'figure'),
-               Output('dropdown_date', 'options')],
+               Output('dropdown_date', 'options'),
+               Output('dropdown_date', 'value')],
               [Input('interval', 'n_intervals'),
                Input('dropdown_date', 'value')])
 def trigger_by_interval(n, selected_date):
-    global current_date, co2_ppm, updated_time, csv_dates, co2_fig
+    global current_date, csv_dates, co2_fig
     date = get_date()
     csv_dates = get_csv_dates()
 
+    co2_ppm, updated_time = sampling()
     if current_date != date:
         current_date = date
         print(f'new csv created: {get_path(current_date)}')
+        co2_fig = get_co2_fig(get_path(current_date))
+        return co2_ppm, updated_time, co2_fig, csv_dates, current_date
 
-    co2_ppm, updated_time = sampling()
     if selected_date is None or selected_date == current_date:
         print(f'selected_date: {selected_date} -> use {current_date}.csv')
         co2_fig = get_co2_fig(get_path(current_date))
-        return co2_ppm, updated_time, co2_fig, csv_dates
+        return co2_ppm, updated_time, co2_fig, csv_dates, current_date
     else:
         print(f'selected_date: {selected_date}.csv exists -> use it')
         co2_fig = get_co2_fig(get_path(selected_date))
-        return co2_ppm, updated_time, co2_fig, csv_dates
+        return co2_ppm, updated_time, co2_fig, csv_dates, selected_date
 
 
 @app.callback(Output('shutdown_message', 'children'), Input('shutdown', 'n_clicks'))
