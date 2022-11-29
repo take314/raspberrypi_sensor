@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir -p data
+
 current_date=$(date +"%Y-%m-%d")
 if [ ! -f data/"$current_date".csv ] ; then
   touch data/"$current_date".csv
