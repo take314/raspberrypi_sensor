@@ -3,8 +3,8 @@ Description=Run sensor monitor
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/python /home/pi/git/raspberrypi_sensor/app.py
-WorkingDirectory=/home/pi/git/raspberrypi_sensor
+ExecStart=/usr/bin/python /home/pi/raspberrypi_sensor/app.py
+WorkingDirectory=/home/pi/raspberrypi_sensor
 Restart=always
 
 [Install]
