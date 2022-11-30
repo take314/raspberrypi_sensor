@@ -20,7 +20,8 @@ def get_path(d):
 
 
 def get_csv_dates():
-    files = sorted(glob.glob('data/*'))
+    files = glob.glob('data/*')
+    files.sort(reverse=True)
     return [f.split('/')[1].split('.')[0] for f in files]
 
 
