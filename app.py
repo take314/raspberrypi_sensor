@@ -112,20 +112,21 @@ def trigger_by_interval(n, selected_date):
 
     co2_ppm, temperature, pressure, humidity, updated_time = sampling()
     print(co2_ppm, temperature, pressure, humidity, updated_time)
+    results_test = f'{co2_ppm} {temperature} {pressure} {humidity}'
     if current_date != date:
         current_date = date
         print(f'new csv created: {get_path(current_date)}')
         co2_fig = get_co2_fig(get_path(current_date))
-        return co2_ppm, updated_time, co2_fig, csv_dates, current_date
+        return results_test, updated_time, co2_fig, csv_dates, current_date
 
     if selected_date is None or selected_date == current_date:
         print(f'selected_date: {selected_date} -> use {current_date}.csv')
         co2_fig = get_co2_fig(get_path(current_date))
-        return co2_ppm, updated_time, co2_fig, csv_dates, current_date
+        return results_test, updated_time, co2_fig, csv_dates, current_date
     else:
         print(f'selected_date: {selected_date}.csv exists -> use it')
         co2_fig = get_co2_fig(get_path(selected_date))
-        return co2_ppm, updated_time, co2_fig, csv_dates, selected_date
+        return results_test, updated_time, co2_fig, csv_dates, selected_date
 
 
 @app.callback(Output('shutdown_message', 'children'), Input('shutdown', 'n_clicks'))
