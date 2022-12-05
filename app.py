@@ -34,7 +34,7 @@ def read_csv(path):
 
 
 def sampling():
-    samples = subprocess.check_output(['bash', 'sampling.sh']).split(' ')
+    samples = subprocess.check_output(['bash', 'sampling.sh'], encoding='utf-8').strip().split(' ')
     co2 = int(samples[0])
     temperature = float(samples[1])
     pressure = float(samples[2])
