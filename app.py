@@ -109,7 +109,7 @@ app.layout = html.Div(children=[
             html.H6(id='shutdown_message', children='', style={'fontSize': 16}),
             html.Br()]),
     html.Img(src='assets/plotly_logo.webp', alt='image', style={'width': '12%', 'marginBottom': 40}),
-    dcc.Interval(id='interval', interval=20000, n_intervals=0)
+    dcc.Interval(id='interval', interval=60000, n_intervals=0)
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
 
