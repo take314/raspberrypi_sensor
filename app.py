@@ -34,9 +34,13 @@ def read_csv(path):
 
 
 def sampling():
-    sample = int(subprocess.check_output(['bash', 'sampling.sh']))
+    samples = subprocess.check_output(['bash', 'sampling.sh']).split(' ')
+    co2 = int(samples[0])
+    temperature = float(samples[1])
+    pressure = float(samples[2])
+    humidity = float(samples[3])
     datetime_now = datetime.now().strftime("%Y/%m/%d - %H:%M:%S")
-    return f'CO2: {sample} ppm', f'{datetime_now}'
+    return f'CO2: {co2} ppm', f'temp: {temperature} ℃', f'pres: {pressure} hPa', f'hum: {humidity} %', f'{datetime_now}'
 
 
 def shutdown():
@@ -106,7 +110,8 @@ def trigger_by_interval(n, selected_date):
     date = get_date()
     csv_dates = get_csv_dates()
 
-    co2_ppm, updated_time = sampling()
+    co2_ppm, temperature, pressure, humidity, updated_time = sampling()
+    print(co2_ppm, temperature, pressure, humidity, updated_time)
     if current_date != date:
         current_date = date
         print(f'new csv created: {get_path(current_date)}')
