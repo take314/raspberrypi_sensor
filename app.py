@@ -4,6 +4,7 @@ import csv
 import glob
 import subprocess
 from datetime import datetime
+from itertools import zip_longest
 
 import dash
 import plotly.graph_objects as go
@@ -29,7 +30,7 @@ def read_csv(path):
     with open(path) as f:
         reader = csv.reader(f, delimiter=' ')
         data = [row for row in reader]
-        data_t = [list(x) for x in zip(*data)]
+        data_t = [list(x) for x in zip_longest(*data)]
     return data_t
 
 
@@ -52,13 +53,27 @@ def get_co2_fig(path):
     layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
     fig = go.Figure(layout=layout)
     timestamp = [datetime.fromtimestamp(int(i)) for i in data[0][1:]]
-    co2_ppm = [int(i) for i in data[1][1:]]
-    fig.add_trace(go.Scatter(x=timestamp, y=co2_ppm, line=dict(width=2, color='Crimson')))
+    co2_ppm = [int(i) if i is not None else None for i in data[1][1:]]
+    t_celsius = [float(i) if i is not None else None for i in data[2][1:]]
+    p_hpa = [float(i) if i is not None else None for i in data[3][1:]]
+    h_percent = [float(i) if i is not None else None for i in data[4][1:]]
+    fig.add_trace(go.Scatter(name='co2', x=timestamp, y=co2_ppm, line=dict(width=2, color='crimson')))
+    fig.add_trace(go.Scatter(name='temp', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
+    fig.add_trace(go.Scatter(name='pres', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
+    fig.add_trace(go.Scatter(name='humid', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
-    fig.update_layout(yaxis_title='CO2 (ppm)',
-                      margin=dict(l=200, r=200, t=10, b=10), showlegend=False,
-                      uirevision='true', height=300)
+    fig.update_layout(margin=dict(l=200, r=200, t=10, b=10), showlegend=True,
+                      uirevision='true', height=300,
+                      xaxis=dict(domain=[0.2, 0.8]),
+                      yaxis=dict(title='CO2 (ppm)', side='left', showgrid=False,
+                                  titlefont=dict(color='crimson'), tickfont=dict(color='crimson'), position=0.15),
+                      yaxis2=dict(title='Temperature (℃)', side='left', showgrid=False, overlaying='y',
+                                  titlefont=dict(color='royalblue'), tickfont=dict(color='royalblue'), position=0.05),
+                      yaxis3=dict(title='Pressure (hPa)', side='right', showgrid=False, overlaying='y',
+                                  titlefont=dict(color='tomato'), tickfont=dict(color='tomato'), position=0.85),
+                      yaxis4=dict(title='Humidity (%)', side='right', showgrid=False, overlaying='y',
+                                  titlefont=dict(color='teal'), tickfont=dict(color='teal'), position=0.95))
     return fig
 
 
