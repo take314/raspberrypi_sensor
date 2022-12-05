@@ -95,7 +95,7 @@ def compensate_P(adc_P):
     v2 = ((pressure / 4.0) * digP[7]) / 8192.0
     pressure = pressure + ((v1 + v2 + digP[6]) / 16.0)
 
-    print("pressure : %7.2f hPa" % (pressure / 100))
+    print("%.2f" % (pressure / 100))
 
 
 def compensate_T(adc_T):
@@ -104,7 +104,7 @@ def compensate_T(adc_T):
     v2 = (adc_T / 131072.0 - digT[0] / 8192.0) * (adc_T / 131072.0 - digT[0] / 8192.0) * digT[2]
     t_fine = v1 + v2
     temperature = t_fine / 5120.0
-    print("temp : %-6.2f ℃" % (temperature))
+    print("%.2f" % (temperature))
 
 
 def compensate_H(adc_H):
@@ -120,7 +120,7 @@ def compensate_H(adc_H):
         var_h = 100.0
     elif var_h < 0.0:
         var_h = 0.0
-    print("hum : %6.2f ％" % (var_h))
+    print("%.2f" % (var_h))
 
 
 def setup():
