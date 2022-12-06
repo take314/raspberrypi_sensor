@@ -66,7 +66,6 @@ def get_co2_fig(csv_data):
     return fig
 
 
-graph_types = ['CO2']
 csv_dates = get_csv_dates()
 current_date = get_date()
 current_csv_data = read_csv(get_path(current_date))
@@ -81,19 +80,15 @@ app.layout = html.Div(children=[
     html.H3(id='container-sample-main', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32}),
     html.H6(id='container-sample-sub', children=' '),
     html.Hr(),
-    html.Div(children=[
-        html.Div(children=[
-                html.Label('Type'),
-                dcc.Dropdown(graph_types, value=graph_types[0], id='dropdown_graphtype', style={'textAlign': 'left'})
-            ], style={'width': '20%', 'display': 'inline-block', 'marginRight': 5}),
-        html.Div(children=[
-                html.Label('Date'),
-                dcc.Dropdown(csv_dates, value=current_date, id='dropdown_date', style={'textAlign': 'left'})
-            ], style={'width': '30%', 'display': 'inline-block', 'marginLeft': 5})
-    ], style={'width': '50%', 'display': 'inline-block'}),
     dcc.Graph(id='co2-graph',
               figure=co2_fig,
               config={'displayModeBar': False, 'responsive': False}),
+    html.Div(children=[
+        html.Div(children=[
+            html.Label('Date'),
+            dcc.Dropdown(csv_dates, value=current_date, id='dropdown_date', style={'textAlign': 'left'})
+        ], style={'width': '20%', 'display': 'inline-block', 'marginLeft': 5})
+    ], style={'width': '50%', 'display': 'inline-block'}),
     html.Hr(),
     html.Div(children=[
             html.Button('Shutdown', id='shutdown', n_clicks=0),
