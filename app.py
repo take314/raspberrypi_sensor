@@ -46,10 +46,10 @@ def get_co2_fig(csv_data):
     t_celsius = [float(i) if i is not None else None for i in csv_data[2][1:]]
     p_hpa = [float(i) if i is not None else None for i in csv_data[3][1:]]
     h_percent = [float(i) if i is not None else None for i in csv_data[4][1:]]
-    fig.add_trace(go.Scatter(name='co2', x=timestamp, y=co2_ppm, line=dict(width=2, color='crimson')))
-    fig.add_trace(go.Scatter(name='temp', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
-    fig.add_trace(go.Scatter(name='pres', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
-    fig.add_trace(go.Scatter(name='humid', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=co2_ppm, line=dict(width=2, color='crimson')))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
     fig.update_layout(margin=dict(l=100, r=150, t=10, b=10), showlegend=True,
@@ -80,25 +80,25 @@ app.layout = html.Div(children=[
     html.Hr(),
     html.Div(children=[
         html.Div(children=[
-            html.H3(children='CO2 [ppm]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'crimson'}),
-            html.H3(id='current-co2', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'crimson'}),
-        ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5}),
+            html.H3(children='CO2', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'crimson'}),
+            html.H3(id='current-co2', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'crimson'}),
+        ], style={'width': '20%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Temp [°C]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'royalblue'}),
-            html.H3(id='current-temp', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'royalblue'}),
-        ], style={'width': '20%', 'display': 'inline-block', 'marginLeft': 5}),
+            html.H3(children='Temperature', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'royalblue'}),
+            html.H3(id='current-temp', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'royalblue'}),
+        ], style={'width': '20%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Pres [hPa]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'tomato'}),
-            html.H3(id='current-pres', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'tomato'}),
-        ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5}),
+            html.H3(children='Air pressure', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'tomato'}),
+            html.H3(id='current-pres', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'tomato'}),
+        ], style={'width': '30%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Humid [%]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'teal'}),
-            html.H3(id='current-humid', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'teal'}),
-        ], style={'width': '27%', 'display': 'inline-block', 'marginLeft': 5})
-    ], style={'width': '65%', 'display': 'inline-block'}),
+            html.H3(children='Humidity', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'teal'}),
+            html.H3(id='current-humid', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'teal'}),
+        ], style={'width': '20%', 'display': 'inline-block'})
+    ], style={'width': '65%', 'display': 'inline-block', 'backgroundColor': 'WhiteSmoke'}),
     html.Div(children=[
-        html.H6(children='last update:'),
-        html.H6(id='last-update', children=' '),
+        html.H6(children='last update:', style={'fontSize': 16}),
+        html.H6(id='last-update', children=' ', style={'fontSize': 16}),
     ]),
     html.Hr(),
     dcc.Graph(id='co2-graph',
@@ -137,10 +137,10 @@ def trigger_by_interval(n, selected_date):
     current_csv_data = read_csv(get_path(current_date))
 
     last_update = datetime.now().strftime("%Y/%m/%d - %H:%M:%S")
-    co2 = current_csv_data[1][-1]
-    temp = current_csv_data[2][-1]
-    pres = current_csv_data[3][-1]
-    humid = current_csv_data[4][-1]
+    co2 = f'{current_csv_data[1][-1]} ppm'
+    temp = f'{current_csv_data[2][-1]} °C'
+    pres = f'{current_csv_data[3][-1]} hPa'
+    humid = f'{current_csv_data[4][-1]} %'
 
     if current_date != date:
         current_date = date
