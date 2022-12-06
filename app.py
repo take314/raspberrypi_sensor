@@ -34,29 +34,18 @@ def read_csv(path):
     return data_t
 
 
-def sampling():
-    samples = subprocess.check_output(['bash', 'sampling.sh'], encoding='utf-8').strip().split(' ')
-    co2 = int(samples[0])
-    temperature = float(samples[1])
-    pressure = float(samples[2])
-    humidity = float(samples[3])
-    datetime_now = datetime.now().strftime("%Y/%m/%d - %H:%M:%S")
-    return f'CO2: {co2} ppm', f'temp: {temperature} ℃', f'pres: {pressure} hPa', f'hum: {humidity} %', f'{datetime_now}'
-
-
 def shutdown():
     subprocess.Popen(['bash', 'shutdown.sh'])
 
 
-def get_co2_fig(path):
-    data = read_csv(path)
+def get_co2_fig(csv_data):
     layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
     fig = go.Figure(layout=layout)
-    timestamp = [datetime.fromtimestamp(int(i)) for i in data[0][1:]]
-    co2_ppm = [int(i) if i is not None else None for i in data[1][1:]]
-    t_celsius = [float(i) if i is not None else None for i in data[2][1:]]
-    p_hpa = [float(i) if i is not None else None for i in data[3][1:]]
-    h_percent = [float(i) if i is not None else None for i in data[4][1:]]
+    timestamp = [datetime.fromtimestamp(int(i)) for i in csv_data[0][1:]]
+    co2_ppm = [int(i) if i is not None else None for i in csv_data[1][1:]]
+    t_celsius = [float(i) if i is not None else None for i in csv_data[2][1:]]
+    p_hpa = [float(i) if i is not None else None for i in csv_data[3][1:]]
+    h_percent = [float(i) if i is not None else None for i in csv_data[4][1:]]
     fig.add_trace(go.Scatter(name='co2', x=timestamp, y=co2_ppm, line=dict(width=2, color='crimson')))
     fig.add_trace(go.Scatter(name='temp', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
     fig.add_trace(go.Scatter(name='pres', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
@@ -80,7 +69,9 @@ def get_co2_fig(path):
 graph_types = ['CO2']
 csv_dates = get_csv_dates()
 current_date = get_date()
-co2_fig = get_co2_fig(get_path(current_date))
+current_csv_data = read_csv(get_path(current_date))
+selected_csv_data = current_csv_data
+co2_fig = get_co2_fig(current_csv_data)
 
 app = dash.Dash(__name__)
 app.title = 'Raspberry Pi Sensor Monitor'
@@ -121,27 +112,33 @@ app.layout = html.Div(children=[
               [Input('interval', 'n_intervals'),
                Input('dropdown_date', 'value')])
 def trigger_by_interval(n, selected_date):
-    global current_date, csv_dates, co2_fig
+    global current_date, csv_dates, current_csv_data, selected_csv_data, co2_fig
     date = get_date()
     csv_dates = get_csv_dates()
 
-    co2_ppm, temperature, pressure, humidity, updated_time = sampling()
-    print(co2_ppm, temperature, pressure, humidity, updated_time)
+    last_update = f'last update: {datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
+    co2_ppm = current_csv_data[1][-1]
+    temperature = current_csv_data[2][-1]
+    pressure = current_csv_data[3][-1]
+    humidity = current_csv_data[4][-1]
+
     results_test = f'{co2_ppm} {temperature} {pressure} {humidity}'
     if current_date != date:
         current_date = date
+        current_csv_data = read_csv(get_path(current_date))
         print(f'new csv created: {get_path(current_date)}')
-        co2_fig = get_co2_fig(get_path(current_date))
-        return results_test, updated_time, co2_fig, csv_dates, current_date
+        co2_fig = get_co2_fig(current_csv_data)
+        return results_test, last_update, co2_fig, csv_dates, current_date
 
     if selected_date is None or selected_date == current_date:
         print(f'selected_date: {selected_date} -> use {current_date}.csv')
-        co2_fig = get_co2_fig(get_path(current_date))
-        return results_test, updated_time, co2_fig, csv_dates, current_date
+        co2_fig = get_co2_fig(current_csv_data)
+        return results_test, last_update, co2_fig, csv_dates, current_date
     else:
         print(f'selected_date: {selected_date}.csv exists -> use it')
-        co2_fig = get_co2_fig(get_path(selected_date))
-        return results_test, updated_time, co2_fig, csv_dates, selected_date
+        selected_csv_data = read_csv(get_path(selected_date))
+        co2_fig = get_co2_fig(selected_csv_data)
+        return results_test, last_update, co2_fig, csv_dates, selected_date
 
 
 @app.callback(Output('shutdown_message', 'children'), Input('shutdown', 'n_clicks'))
