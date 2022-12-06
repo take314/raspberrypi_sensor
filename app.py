@@ -77,7 +77,25 @@ app.title = 'Raspberry Pi Sensor Monitor'
 app.layout = html.Div(children=[
     html.Br(),
     html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': 'Arial Black', 'fontSize': 48}),
-    html.H3(id='container-sample-main', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32}),
+    html.Hr(),
+    html.Div(children=[
+        html.Div(children=[
+            html.H3(children='CO2 [ppm]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'crimson'}),
+            html.H3(id='current-co2', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'crimson'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5}),
+        html.Div(children=[
+            html.H3(children='Temp [°C]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'royalblue'}),
+            html.H3(id='current-temp', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'royalblue'}),
+        ], style={'width': '20%', 'display': 'inline-block', 'marginLeft': 5}),
+        html.Div(children=[
+            html.H3(children='Pres [hPa]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'tomato'}),
+            html.H3(id='current-pres', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'tomato'}),
+        ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5}),
+        html.Div(children=[
+            html.H3(children='Humid [%]', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'teal'}),
+            html.H3(id='current-humid', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'teal'}),
+        ], style={'width': '27%', 'display': 'inline-block', 'marginLeft': 5})
+    ], style={'width': '65%', 'display': 'inline-block'}),
     html.H6(id='container-sample-sub', children=' '),
     html.Hr(),
     dcc.Graph(id='co2-graph',
@@ -99,7 +117,10 @@ app.layout = html.Div(children=[
 ], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
 
 
-@app.callback([Output('container-sample-main', 'children'),
+@app.callback([Output('current-co2', 'children'),
+               Output('current-temp', 'children'),
+               Output('current-pres', 'children'),
+               Output('current-humid', 'children'),
                Output('container-sample-sub', 'children'),
                Output('co2-graph', 'figure'),
                Output('dropdown_date', 'options'),
@@ -112,28 +133,26 @@ def trigger_by_interval(n, selected_date):
     csv_dates = get_csv_dates()
 
     last_update = f'last update: {datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
-    co2_ppm = current_csv_data[1][-1]
-    temperature = current_csv_data[2][-1]
-    pressure = current_csv_data[3][-1]
-    humidity = current_csv_data[4][-1]
+    co2 = current_csv_data[1][-1]
+    temp = current_csv_data[2][-1]
+    pres = current_csv_data[3][-1]
+    humid = current_csv_data[4][-1]
 
-    results_test = f'{co2_ppm} {temperature} {pressure} {humidity}'
     if current_date != date:
         current_date = date
         current_csv_data = read_csv(get_path(current_date))
         print(f'new csv created: {get_path(current_date)}')
         co2_fig = get_co2_fig(current_csv_data)
-        return results_test, last_update, co2_fig, csv_dates, current_date
-
+        return co2, temp, pres, humid, last_update, co2_fig, csv_dates, current_date
     if selected_date is None or selected_date == current_date:
         print(f'selected_date: {selected_date} -> use {current_date}.csv')
         co2_fig = get_co2_fig(current_csv_data)
-        return results_test, last_update, co2_fig, csv_dates, current_date
+        return co2, temp, pres, humid, last_update, co2_fig, csv_dates, current_date
     else:
         print(f'selected_date: {selected_date}.csv exists -> use it')
         selected_csv_data = read_csv(get_path(selected_date))
         co2_fig = get_co2_fig(selected_csv_data)
-        return results_test, last_update, co2_fig, csv_dates, selected_date
+        return co2, temp, pres, humid, last_update, co2_fig, csv_dates, selected_date
 
 
 @app.callback(Output('shutdown_message', 'children'), Input('shutdown', 'n_clicks'))
