@@ -131,6 +131,7 @@ def trigger_by_interval(n, selected_date):
     global current_date, csv_dates, current_csv_data, selected_csv_data, co2_fig
     date = get_date()
     csv_dates = get_csv_dates()
+    current_csv_data = read_csv(get_path(current_date))
 
     last_update = f'last update: {datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
     co2 = current_csv_data[1][-1]
@@ -140,7 +141,6 @@ def trigger_by_interval(n, selected_date):
 
     if current_date != date:
         current_date = date
-        current_csv_data = read_csv(get_path(current_date))
         print(f'new csv created: {get_path(current_date)}')
         co2_fig = get_co2_fig(current_csv_data)
         return co2, temp, pres, humid, last_update, co2_fig, csv_dates, current_date
