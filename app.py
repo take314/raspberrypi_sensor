@@ -52,7 +52,7 @@ def get_co2_fig(csv_data):
     fig.add_trace(go.Scatter(name='humid', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
-    fig.update_layout(margin=dict(l=200, r=200, t=10, b=10), showlegend=True,
+    fig.update_layout(margin=dict(l=100, r=150, t=10, b=10), showlegend=True,
                       uirevision='true', height=300,
                       xaxis=dict(domain=[0.2, 0.8]),
                       yaxis=dict(title='CO2 (ppm)', side='left', showgrid=False,
@@ -96,7 +96,10 @@ app.layout = html.Div(children=[
             html.H3(id='current-humid', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 32, 'color': 'teal'}),
         ], style={'width': '27%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '65%', 'display': 'inline-block'}),
-    html.H6(id='container-sample-sub', children=' '),
+    html.Div(children=[
+        html.H6(children='last update:'),
+        html.H6(id='last-update', children=' '),
+    ]),
     html.Hr(),
     dcc.Graph(id='co2-graph',
               figure=co2_fig,
@@ -105,7 +108,7 @@ app.layout = html.Div(children=[
         html.Div(children=[
             html.Label('Date'),
             dcc.Dropdown(csv_dates, value=current_date, id='dropdown_date', style={'textAlign': 'left'})
-        ], style={'width': '20%', 'display': 'inline-block', 'marginLeft': 5})
+        ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '50%', 'display': 'inline-block'}),
     html.Hr(),
     html.Div(children=[
@@ -121,7 +124,7 @@ app.layout = html.Div(children=[
                Output('current-temp', 'children'),
                Output('current-pres', 'children'),
                Output('current-humid', 'children'),
-               Output('container-sample-sub', 'children'),
+               Output('last-update', 'children'),
                Output('co2-graph', 'figure'),
                Output('dropdown_date', 'options'),
                Output('dropdown_date', 'value')],
@@ -133,7 +136,7 @@ def trigger_by_interval(n, selected_date):
     csv_dates = get_csv_dates()
     current_csv_data = read_csv(get_path(current_date))
 
-    last_update = f'last update: {datetime.now().strftime("%Y/%m/%d - %H:%M:%S")}'
+    last_update = datetime.now().strftime("%Y/%m/%d - %H:%M:%S")
     co2 = current_csv_data[1][-1]
     temp = current_csv_data[2][-1]
     pres = current_csv_data[3][-1]
