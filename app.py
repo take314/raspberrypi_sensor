@@ -59,7 +59,7 @@ def get_co2_fig(csv_data):
                                   titlefont=dict(color='crimson'), tickfont=dict(color='crimson'), position=0.15),
                       yaxis2=dict(title='Temperature (℃)', side='left', showgrid=False, overlaying='y',
                                   titlefont=dict(color='royalblue'), tickfont=dict(color='royalblue'), position=0.05),
-                      yaxis3=dict(title='Pressure (hPa)', side='right', showgrid=False, overlaying='y',
+                      yaxis3=dict(title='Air pressure (hPa)', side='right', showgrid=False, overlaying='y',
                                   titlefont=dict(color='tomato'), tickfont=dict(color='tomato'), position=0.85),
                       yaxis4=dict(title='Humidity (%)', side='right', showgrid=False, overlaying='y',
                                   titlefont=dict(color='teal'), tickfont=dict(color='teal'), position=0.95))
