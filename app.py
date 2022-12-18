@@ -107,7 +107,7 @@ app.layout = html.Div(children=[
     html.Div(children=[
         html.Div(children=[
             html.Label('Date'),
-            dcc.Dropdown(csv_dates, value=current_date, id='dropdown_date', style={'textAlign': 'left'})
+            dcc.Dropdown(csv_dates, id='dropdown_date', style={'textAlign': 'left'})
         ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '50%', 'display': 'inline-block'}),
     html.Hr(),
@@ -168,4 +168,4 @@ def shutdown_button_clicked(n_clicks):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False, host="0.0.0.0")
+    app.run_server(debug=True, host="0.0.0.0")
