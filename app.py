@@ -28,7 +28,7 @@ def get_csv_dates():
 
 def read_csv(path):
     with open(path) as f:
-        reader = csv.reader(f, delimiter=' ')
+        reader = csv.reader((line.replace('\0', '') for line in f), delimiter=' ')
         data = [row for row in reader]
         data_t = [list(x) for x in zip_longest(*data)]
     return data_t
