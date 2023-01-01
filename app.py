@@ -50,6 +50,10 @@ def get_co2_fig(csv_data):
     fig.add_trace(go.Scatter(name='', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
     fig.add_trace(go.Scatter(name='', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
     fig.add_trace(go.Scatter(name='', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[co2_ppm[-1]], marker=dict(size=3, color='crimson')))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[t_celsius[-1]], marker=dict(size=3, color='royalblue'), yaxis="y2"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[p_hpa[-1]], marker=dict(size=3, color='tomato'), yaxis="y3"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[h_percent[-1]], marker=dict(size=3, color='teal'), yaxis="y4"))
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
     fig.update_layout(margin=dict(l=100, r=150, t=10, b=10), showlegend=True,
