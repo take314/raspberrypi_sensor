@@ -11,6 +11,40 @@ import plotly.graph_objects as go
 from dash import dcc, html
 from dash.dependencies import Input, Output
 
+THEME = 'dark'
+FONT = 'Arial Black'
+
+if THEME == 'dark':
+    LOGO_PATH = 'assets/Plotly-Logo-White.svg'
+    COLOR_BG = '#191919'
+    COLOR_TITLE = '#DCDCDC'
+    COLOR_BORDER = '#404244'
+    COLOR_BUTTON_BORDER = '#808284'
+    COLOR_CO2 = 'crimson'
+    COLOR_TEMP = 'royalblue'
+    COLOR_AP = 'tomato'
+    COLOR_HUMID = 'teal'
+    INDEX_STRING = '''
+    <!DOCTYPE html><html><head>{%metas%}<title>{%title%}</title>{%favicon%}{%css%}
+    <style>body{background-color:#191919;}</style>
+    </head><body>{%app_entry%}{%config%}{%scripts%}{%renderer%}</body></html>
+    '''
+else:
+    LOGO_PATH = 'assets/plotly_logo.webp'
+    COLOR_BG = 'WhiteSmoke'
+    COLOR_TITLE = '#24304A'
+    COLOR_BORDER = '#DADADA'
+    COLOR_BUTTON_BORDER = '#C1C1C1'
+    COLOR_CO2 = 'crimson'
+    COLOR_TEMP = 'royalblue'
+    COLOR_AP = 'tomato'
+    COLOR_HUMID = 'teal'
+    INDEX_STRING = '''
+    <!DOCTYPE html><html><head>{%metas%}<title>{%title%}</title>{%favicon%}{%css%}
+    <style>body{background-color:WhiteSmoke;}</style>
+    </head><body>{%app_entry%}{%config%}{%scripts%}{%renderer%}</body></html>
+    '''
+
 
 def get_date():
     return str(datetime.now()).split(' ')[0]
@@ -39,34 +73,36 @@ def shutdown():
 
 
 def get_co2_fig(csv_data):
-    layout = go.Layout(plot_bgcolor='WhiteSmoke', paper_bgcolor='WhiteSmoke')
+    layout = go.Layout(plot_bgcolor=COLOR_BG, paper_bgcolor=COLOR_BG,
+                       xaxis={'tickfont': {'color': COLOR_TITLE}},
+                       yaxis={'tickfont': {'color': COLOR_TITLE}})
     fig = go.Figure(layout=layout)
     timestamp = [datetime.fromtimestamp(int(i)) for i in csv_data[0][1:]]
     co2_ppm = [int(i) if i is not None else None for i in csv_data[1][1:]]
     t_celsius = [float(i) if i is not None else None for i in csv_data[2][1:]]
     p_hpa = [float(i) if i is not None else None for i in csv_data[3][1:]]
     h_percent = [float(i) if i is not None else None for i in csv_data[4][1:]]
-    fig.add_trace(go.Scatter(name='', x=timestamp, y=co2_ppm, line=dict(width=2, color='crimson')))
-    fig.add_trace(go.Scatter(name='', x=timestamp, y=t_celsius, line=dict(width=2, color='royalblue'), yaxis="y2"))
-    fig.add_trace(go.Scatter(name='', x=timestamp, y=p_hpa, line=dict(width=2, color='tomato'), yaxis="y3"))
-    fig.add_trace(go.Scatter(name='', x=timestamp, y=h_percent, line=dict(width=2, color='teal'), yaxis="y4"))
-    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[co2_ppm[-1]], marker=dict(size=6, color='crimson'), showlegend=False))
-    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[t_celsius[-1]], marker=dict(size=6, color='royalblue'), showlegend=False, yaxis="y2"))
-    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[p_hpa[-1]], marker=dict(size=6, color='tomato'), showlegend=False, yaxis="y3"))
-    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[h_percent[-1]], marker=dict(size=6, color='teal'), showlegend=False, yaxis="y4"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=co2_ppm, line=dict(width=2, color=COLOR_CO2)))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=t_celsius, line=dict(width=2, color=COLOR_TEMP), yaxis="y2"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=p_hpa, line=dict(width=2, color=COLOR_AP), yaxis="y3"))
+    fig.add_trace(go.Scatter(name='', x=timestamp, y=h_percent, line=dict(width=2, color=COLOR_HUMID), yaxis="y4"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[co2_ppm[-1]], marker=dict(size=6, color=COLOR_CO2), showlegend=False))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[t_celsius[-1]], marker=dict(size=6, color=COLOR_TEMP), showlegend=False, yaxis="y2"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[p_hpa[-1]], marker=dict(size=6, color=COLOR_AP), showlegend=False, yaxis="y3"))
+    fig.add_trace(go.Scatter(name='', x=[timestamp[-1]], y=[h_percent[-1]], marker=dict(size=6, color=COLOR_HUMID), showlegend=False, yaxis="y4"))
     fig.update_xaxes(showgrid=False)
     fig.update_yaxes(showgrid=False)
     fig.update_layout(margin=dict(l=100, r=150, t=10, b=10), showlegend=True,
                       uirevision='true', height=300,
                       xaxis=dict(domain=[0.2, 0.8]),
                       yaxis=dict(title='CO2 (ppm)', side='left', showgrid=False,
-                                  titlefont=dict(color='crimson'), tickfont=dict(color='crimson'), position=0.15),
+                                  titlefont=dict(color=COLOR_CO2), tickfont=dict(color=COLOR_CO2), position=0.15),
                       yaxis2=dict(title='Temperature (℃)', side='left', showgrid=False, overlaying='y',
-                                  titlefont=dict(color='royalblue'), tickfont=dict(color='royalblue'), position=0.05),
+                                  titlefont=dict(color=COLOR_TEMP), tickfont=dict(color=COLOR_TEMP), position=0.05),
                       yaxis3=dict(title='Air pressure (hPa)', side='right', showgrid=False, overlaying='y',
-                                  titlefont=dict(color='tomato'), tickfont=dict(color='tomato'), position=0.85),
+                                  titlefont=dict(color=COLOR_AP), tickfont=dict(color=COLOR_AP), position=0.85),
                       yaxis4=dict(title='Humidity (%)', side='right', showgrid=False, overlaying='y',
-                                  titlefont=dict(color='teal'), tickfont=dict(color='teal'), position=0.95))
+                                  titlefont=dict(color=COLOR_HUMID), tickfont=dict(color=COLOR_HUMID), position=0.95))
     return fig
 
 
@@ -78,50 +114,53 @@ co2_fig = get_co2_fig(current_csv_data)
 
 app = dash.Dash(__name__)
 app.title = 'Raspberry Pi Sensor Monitor'
+app.index_string = INDEX_STRING
 app.layout = html.Div(children=[
     html.Br(),
-    html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': 'Arial Black', 'fontSize': 48}),
-    html.Hr(),
+    html.H3(children='Raspberry Pi Sensor Monitor', style={'fontFamily': FONT, 'fontSize': 48}),
+    html.Hr(style={"borderColor": COLOR_BORDER}),
     html.Div(children=[
         html.Div(children=[
-            html.H3(children='CO2', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'crimson'}),
-            html.H3(id='current-co2', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'crimson'}),
+            html.H3(children='CO2', style={'fontFamily': FONT, 'fontSize': 20, 'color': COLOR_CO2}),
+            html.H3(id='current-co2', children=' ', style={'fontFamily': FONT, 'fontSize': 30, 'color': COLOR_CO2}),
         ], style={'width': '20%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Temperature', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'royalblue'}),
-            html.H3(id='current-temp', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'royalblue'}),
+            html.H3(children='Temperature', style={'fontFamily': FONT, 'fontSize': 20, 'color': COLOR_TEMP}),
+            html.H3(id='current-temp', children=' ', style={'fontFamily': FONT, 'fontSize': 30, 'color': COLOR_TEMP}),
         ], style={'width': '20%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Air pressure', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'tomato'}),
-            html.H3(id='current-pres', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'tomato'}),
+            html.H3(children='Air pressure', style={'fontFamily': FONT, 'fontSize': 20, 'color': COLOR_AP}),
+            html.H3(id='current-pres', children=' ', style={'fontFamily': FONT, 'fontSize': 30, 'color': COLOR_AP}),
         ], style={'width': '30%', 'display': 'inline-block'}),
         html.Div(children=[
-            html.H3(children='Humidity', style={'fontFamily': 'Arial Black', 'fontSize': 20, 'color': 'teal'}),
-            html.H3(id='current-humid', children=' ', style={'fontFamily': 'Arial Black', 'fontSize': 30, 'color': 'teal'}),
+            html.H3(children='Humidity', style={'fontFamily': FONT, 'fontSize': 20, 'color': COLOR_HUMID}),
+            html.H3(id='current-humid', children=' ', style={'fontFamily': FONT, 'fontSize': 30, 'color': COLOR_HUMID}),
         ], style={'width': '20%', 'display': 'inline-block'})
-    ], style={'width': '65%', 'display': 'inline-block', 'backgroundColor': 'WhiteSmoke'}),
+    ], style={'width': '65%', 'display': 'inline-block', 'backgroundColor': COLOR_BG}),
     html.Div(children=[
         html.H6(children='last update:', style={'fontSize': 16}),
         html.H6(id='last-update', children=' ', style={'fontSize': 16}),
     ]),
-    html.Hr(),
+    html.Hr(style={"borderColor": COLOR_BORDER}),
     dcc.Graph(id='co2-graph',
               figure=co2_fig,
               config={'displayModeBar': False, 'responsive': False}),
     html.Div(children=[
         html.Div(children=[
             html.Label('Date'),
-            dcc.Dropdown(csv_dates, id='dropdown_date', style={'textAlign': 'left'})
+            dcc.Dropdown(csv_dates, id='dropdown_date',
+                         style={'textAlign': 'left', 'color': COLOR_BORDER, 'borderColor': COLOR_BUTTON_BORDER, 'backgroundColor': COLOR_BG})
         ], style={'width': '25%', 'display': 'inline-block', 'marginLeft': 5})
     ], style={'width': '50%', 'display': 'inline-block'}),
-    html.Hr(),
+    html.Hr(style={"borderColor": COLOR_BORDER}),
     html.Div(children=[
-            html.Button('Shutdown', id='shutdown', n_clicks=0),
+            html.Button('Shutdown', id='shutdown', n_clicks=0,
+                        style={'borderColor': COLOR_BUTTON_BORDER, 'backgroundColor': COLOR_BG}),
             html.H6(id='shutdown_message', children='', style={'fontSize': 16}),
             html.Br()]),
-    html.Img(src='assets/plotly_logo.webp', alt='image', style={'width': '12%', 'marginBottom': 40}),
+    html.Img(src=LOGO_PATH, alt='image', style={'width': '12%', 'marginBottom': 40}),
     dcc.Interval(id='interval', interval=60000, n_intervals=0)
-], style={'textAlign': 'center', 'backgroundColor': 'WhiteSmoke', 'color': '#2F3F5C'})
+], style={'textAlign': 'center', 'backgroundColor': COLOR_BG, 'color': COLOR_TITLE})
 
 
 @app.callback([Output('current-co2', 'children'),
